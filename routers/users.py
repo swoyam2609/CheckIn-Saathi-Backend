@@ -47,3 +47,18 @@ async def login_user(username: str, password: str):
             return JSONResponse(content={"message": "Password is incorrect"}, status_code=400)
     else:
         return JSONResponse(content={"message": "Username not found"}, status_code=400)
+    
+@router.delete("/users/delete", tags=["User"])
+async def delete_user(username: str):
+    user = mongo.db.users.find_one({"username": username})
+    email_auth.send_otp(user["email"])
+    return JSONResponse(content={"message": "OTP sent successfully"}, status_code=200)
+
+@router.post("/users/delete/verify", tags=["User"])
+async def verify_delete_user(username: str, otp: str):
+    response = email_auth.verify_otp(username, otp)
+    if response == True:
+        mongo.db.users.delete_one({"username": username})
+        return {"message": "User deleted successfully"}
+    else:
+        return response
