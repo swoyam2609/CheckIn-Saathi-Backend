@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter
 from model import user
 from dependencies import mongo, email_auth, pass_jwt
 from fastapi.responses import JSONResponse
@@ -29,8 +28,8 @@ async def signup_user(user : user.User):
         email_auth.send_otp(user.email)
         return JSONResponse(content={"message": "OTP sent successfully"}, status_code=200)
 
-@router.post("/users/signup/verify", tags=["User"])
-async def verify_user_signup(user : user.User, otp: str):
+@router.post("/users/verify", tags=["User"])
+async def verify_user(user : user.User, otp: str):
     response = email_auth.verify_otp(user.email, otp)
     if response == True:
         return await signup(user)
@@ -38,10 +37,10 @@ async def verify_user_signup(user : user.User, otp: str):
         return response
 
 @router.get("/users/login", tags=["User"])
-async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = mongo.db.users.find_one({"username": form_data.username})
+async def login_user(username: str, password: str):
+    user = mongo.db.users.find_one({"username": username})
     if user:
-        if pass_jwt.verify_password(form_data.username, user["password"]):
+        if pass_jwt.verify_password(password, user["password"]):
             jwt_token = pass_jwt.create_jwt_token({"username": user["username"]})
             return {"message": "Login successful", "token": jwt_token, "token_type": "bearer"}
         else:
