@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from models import user
+from model import user
 from dependencies import mongo, email_auth, pass_jwt
 from fastapi.responses import JSONResponse
 
