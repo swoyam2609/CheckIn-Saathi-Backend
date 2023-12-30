@@ -1,0 +1,1 @@
+mongourl = "mongodb+srv://swoyamsiddharthnayak:swoyamsiddharthnayak@cluster1.jar6lr0.mongodb.net/"
