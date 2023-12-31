@@ -56,6 +56,7 @@ async def delete_event(unique_id: str, username: str = Depends(pass_jwt.get_curr
 @router.get("/events/get", tags=["Event"])
 async def get_event(unique_id: str):
     temp = mongo.db.events.find_one({"unique_id": unique_id})
+    temp["_id"] = str(temp["_id"])
     if temp:
         return temp
     else:
@@ -64,7 +65,14 @@ async def get_event(unique_id: str):
 @router.get("/events/get/all", tags=["Event"])
 async def get_all_events(username: str = Depends(pass_jwt.get_current_user)):
     temp = mongo.db.events.find({"organizer": username})
-    if temp:
-        return list(temp)
+    res = []
+    for i in temp:
+        i["_id"] = str(i["_id"])
+        res.append(i)
+    if len(res) > 0:
+        try:
+            return res
+        except TypeError:
+            return JSONResponse(content={"message": "No events found"}, status_code=400)
     else:
         return JSONResponse(content={"message": "No events found"}, status_code=400)
