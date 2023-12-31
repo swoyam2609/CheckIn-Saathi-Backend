@@ -28,7 +28,7 @@ async def signup_user(user : user.User):
         email_auth.send_otp(user.email)
         return JSONResponse(content={"message": "OTP sent successfully"}, status_code=200)
 
-@router.post("/users/verify", tags=["User"])
+@router.post("/users/signup/verify", tags=["User"])
 async def verify_user(user : user.User, otp: str):
     response = email_auth.verify_otp(user.email, otp)
     if response == True:
@@ -51,12 +51,16 @@ async def login_user(username: str, password: str):
 @router.delete("/users/delete", tags=["User"])
 async def delete_user(username: str):
     user = mongo.db.users.find_one({"username": username})
-    email_auth.send_otp(user["email"])
-    return JSONResponse(content={"message": "OTP sent successfully"}, status_code=200)
+    if user:
+        email_auth.send_otp(user["email"])
+        return JSONResponse(content={"message": "OTP sent successfully"}, status_code=200)
+    else:
+        return JSONResponse(content={"message": "Username not found"}, status_code=400)
 
-@router.post("/users/delete/verify", tags=["User"])
+@router.delete("/users/delete/verify", tags=["User"])
 async def verify_delete_user(username: str, otp: str):
-    response = email_auth.verify_otp(username, otp)
+    user = mongo.db.users.find_one({"username": username})
+    response = email_auth.verify_otp(user["email"], otp)
     if response == True:
         mongo.db.users.delete_one({"username": username})
         return {"message": "User deleted successfully"}
