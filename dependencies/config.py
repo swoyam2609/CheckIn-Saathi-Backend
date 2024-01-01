@@ -2,3 +2,4 @@ mongourl = "mongodb+srv://swoyamsiddharthnayak:swoyamsiddharthnayak@cluster1.jar
 SECRET_KEY = "checkinsaathi"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+origins = ["*"]
